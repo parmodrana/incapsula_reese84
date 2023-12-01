@@ -1,4 +1,11 @@
+# NOTE FOR DIWI TEAM: 
+## How to run 
 
+- Run `node incapsula\reese84\decode-payload.js obfuscated-reese84.js rawpayloads.txt` if you want to decode from *obfuscated-reese84.js* (obfuscated-reese84.js can be different and from https://api.prod.projectfinance.io/little-Minist-walkinderes-his-Buttrie-innies-hel)
+
+- Another example is in _obfuscated-reese84.js file (have prefix _), this is from https://www.pokemoncenter.com/kie-Yes-him-To-the-To-mocking-and-do-mise-I-prom
+
+  
 
 # Incapsula
 - [Incapsula](#incapsula)
