@@ -485,23 +485,16 @@ function extractSignals({signalPaths}){
 
         (() => {
 
-          const code = generate(path.node).code;	  
+			const code = generate(path.node).code;	  
 
-          if(!code.endsWith(`["userAgent"];`)){
-            return;
-          }		  
+			if(!code.endsWith(`["userAgent"];`)){
+				return;
+			}
 
-          const nextPath = path.parentPath.parentPath.parentPath.parentPath.getPrevSibling();		  
-
-		  try {
-			const leftProp = nextPath.get(`expression.arguments.0.body.body.0.consequent.body.0.expression.left.property`);
-          	FINDERS['interrogator_id'] = getPropertyValue(leftProp);
-
-		  }
-		  catch{
-			console.log(``);
-
-		  }
+          	const nextPath = path.parentPath.parentPath.parentPath.parentPath.getPrevSibling();		  		  
+		  
+			const leftProp = nextPath.get(`expression.arguments.0.body.body`).slice(-1)[0].get(`expression.left.property`);
+        	FINDERS['interrogator_id'] = getPropertyValue(leftProp);		  
 
         })();
 
@@ -750,18 +743,27 @@ function extractSignals({signalPaths}){
         })();
 
         (() => {
-          const code = generate(path.node).code;
+			const code = generate(path.node).code;
 
-          if(!code.endsWith(`["dump"];`)){
-            return;
-          }
+			if(!code.endsWith(`["dump"];`)){
+				return;
+			}
 
-          const nextPath = path.parentPath.parentPath.parentPath.parentPath.getPrevSibling();
+			const nextPath = path.parentPath.parentPath.parentPath.parentPath.getPrevSibling();			
 
-		  console.log(`dump`, generate(nextPath.node).code, );
+			const xm = nextPath.get(`expression.arguments.0.body.body`).slice(-1)[0]; 			
 
-          const leftProp = nextPath.get(`expression.arguments.0.body.body`).slice(-1)[0].get(`consequent.body.0.expression.left.property`);
-          FINDERS['create_html_document'] = getPropertyValue(leftProp);
+			
+			/**
+			 * Original work
+			 * const leftProp = nextPath.get(`expression.arguments.0.body.body`).slice(-1)[0].get(`consequent.body.0.expression.left.property`);			
+			 * 
+			 * and the code looks like: 
+			 * 
+			 * xm["eh3hdCQEY5a9xT6HJmUIz5ayeFYlOAm5uSjEpqKg3wGAAA=="] = iY;
+			 */
+			const leftProp = nextPath.get(`expression.arguments.0.body.body`).slice(-1)[0].get(`expression.left.property`);
+			FINDERS['create_html_document'] = getPropertyValue(leftProp);
 
         })();
 
@@ -1082,14 +1084,14 @@ function extractSignals({signalPaths}){
               ){
                 index++;
                 if(index === 2){
-					try {
+
+					if (currentSibling.getSibling(currentSibling.key + 3).type === "ExpressionStatement") {
+
 						FINDERS['events'] = getPropertyValue(currentSibling.getSibling(currentSibling.key + 3).get(`expression.left.property`));
-					}
-					catch {
-						console.log(`events has an issue`);
+						
 					}
                   
-                  break;
+					break;
                 }
               }
 
@@ -1100,33 +1102,34 @@ function extractSignals({signalPaths}){
               }
             }
           }
-        })();
-
-		//console.log(JSON.stringify(FINDERS));
+        })();		
 
         (() => {
 			let index = 0;
 			if(t.isStringLiteral(property) && property.value === "abort" && t.isAssignmentExpression(path.parentPath.node)){
 				const topPath = path.getStatementParent();
-				for(let currentSibling = topPath;;){					
-
-					
-					//console.log(`1111 ${ generate(currentSibling.node).code }`);
-
-					//console.log(`2222 ${ generate(currentSibling.getNextSibling().node).code }`);
+				
+				for(let currentSibling = topPath;;){
 
 					if(
 						t.isExpressionStatement(currentSibling.node) && t.isCallExpression(currentSibling.node.expression) &&
-						generate(currentSibling.node.expression.callee).code.endsWith(`["push"]`)){
+						generate(currentSibling.node.expression.callee).code.endsWith(`["push"]`)){							
 						
 							index++;
 							if(index === 1){
-								try {
+
+								//There are 3 cases: 
+								// 	Case 1: Kz.e12j67Kf5OXR1S7WWyRKsuj8PWUb1eTp = at; (line 2055)
+								// 	Case 2: Kz["bdgvWDEsViEJ3jVwwS1OIWjGEVIh9tvv5+MOmZQi"] = Xg; (line 2333)
+								// 	Case 3: var Z3 = Fu(Gw); (line 2367)
+								//We want it works for case 1 & 2 but not 3
+
+								//Adding check for currentSibling.getNextSibling().type to make it work with case 1 & 2 only
+
+								if (currentSibling.getNextSibling().type === "ExpressionStatement") {
 									FINDERS['events.mouse'] = getPropertyValue(currentSibling.getNextSibling().get(`expression.left.property`));
 								}
-								catch(ex) {
-									console.log(`events.mouse has an issue`);
-								}								
+								
 								break;
 							}
 					}
@@ -1156,13 +1159,14 @@ function extractSignals({signalPaths}){
               ){
                 index++;
                 if(index === 2){
-					try {
-                  		FINDERS['events.touch'] = getPropertyValue(currentSibling.getNextSibling().get(`expression.left.property`));
+
+					if (currentSibling.getNextSibling().type === "ExpressionStatement") { 
+					
+                		FINDERS['events.touch'] = getPropertyValue(currentSibling.getNextSibling().get(`expression.left.property`));
+
 					}
-				  	catch(ex) {
-						console.log(`events.touch has an issue`);
-					}	
-                  break;
+						
+                  	break;
                 }
               }
 
