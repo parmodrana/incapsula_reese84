@@ -2,3 +2,4 @@ node_modules/
 throwaway/
 dist/
 package-lock.json
+ast*.js
