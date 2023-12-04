@@ -670,8 +670,6 @@ function extractXorEncoders(ast){
 	const xorEncoders = [];
 	const signalsPaths = getSignalsPaths(ast);
 
-	//console.log(`signal Paths`, signalsPaths);
-
 	signalsPaths.forEach((currentPath, index) => {
 
 		xorEncoders[index] = [];
@@ -769,13 +767,13 @@ function extractInterrogatorId(ast){
 
   return found;
 }
-function extractSignalsKeys(ast) {
-
-  console.log(`extractSignalsKeys`);
+function extractSignalsKeys(ast) {  
 
   const paths = getSignalsPaths(ast);
 
   const signalKeys = extractSignals({ signalPaths : paths});
+
+  console.log(JSON.stringify(signalKeys));
   
   const getValue = (key) => {
 

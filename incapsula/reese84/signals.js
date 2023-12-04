@@ -119,73 +119,73 @@ const findFirstTryForward = (p) => {
 
 function hasValueInCode({code, valueToFind, mode}){
 
-  let hasBeenFound = false;
+	let hasBeenFound = false;
 
-  switch(mode){
-    case `endsWith`:
-      hasBeenFound = code.endsWith(valueToFind);
-      break;
-    case `startsWith`:
-      hasBeenFound = code.startsWith(valueToFind);
-      break;
-    case `includes`:
-      hasBeenFound = code.includes(valueToFind);
-      break;
-    case `regex`:
-      hasBeenFound = code.match(valueToFind) !== null;
-      break;
-  }
+	switch(mode){
+	case `endsWith`:
+		hasBeenFound = code.endsWith(valueToFind);
+		break;
+	case `startsWith`:
+		hasBeenFound = code.startsWith(valueToFind);
+		break;
+	case `includes`:
+		hasBeenFound = code.includes(valueToFind);
+		break;
+	case `regex`:
+		hasBeenFound = code.match(valueToFind) !== null;
+		break;
+	}
 
-  return hasBeenFound;
+  	return hasBeenFound;
 
 }
 
 function getPropertyValueInAssignment({path, siblingKey}){
 
-  const statementParent = path.getStatementParent();
-  const nextPath = statementParent.getSibling(statementParent.key + siblingKey);
+	const statementParent = path.getStatementParent();
+	const nextPath = statementParent.getSibling(statementParent.key + siblingKey);
 
-  if(!
-  (nextPath.type === `ExpressionStatement` && nextPath.get(`expression`).type === `AssignmentExpression` &&
-    nextPath.get(`expression.left`).type === `MemberExpression` &&
-    (
-      (nextPath.get(`expression.left.property`).type === `StringLiteral` && nextPath.get(`expression.left.computed`).node) ||
-      (nextPath.get(`expression.left.property`).type === `Identifier` && !nextPath.get(`expression.left.computed`).node)
-    )
-  )
-  ){
-    return null;
-  }
+	if(!
+	(nextPath.type === `ExpressionStatement` && nextPath.get(`expression`).type === `AssignmentExpression` &&
+		nextPath.get(`expression.left`).type === `MemberExpression` &&
+		(
+		(nextPath.get(`expression.left.property`).type === `StringLiteral` && nextPath.get(`expression.left.computed`).node) ||
+		(nextPath.get(`expression.left.property`).type === `Identifier` && !nextPath.get(`expression.left.computed`).node)
+		)
+	)
+	){
+		return null;
+	}
 
-  const computed = nextPath.get(`expression.left.computed`).node;
-  const foundKeyValue = nextPath.get(`expression.left.property.${computed ? `value` : `name`}`).node;
+	const computed = nextPath.get(`expression.left.computed`).node;
+	const foundKeyValue = nextPath.get(`expression.left.property.${computed ? `value` : `name`}`).node;
 
-  return { value : foundKeyValue };
+	return { value : foundKeyValue };
 }
 
 function getKeyFromDeclaration({path, valueToFind, mode, siblingKey}){
 
-  if(path.get(`declarations`).length !== 1){
-    return null;
-  }
+	if(path.get(`declarations`).length !== 1){
+		return null;
+	}
 
-  const init = path.get(`declarations.0.init`);
-  const initCode = generate(init.node).code;
+	const init = path.get(`declarations.0.init`);
+	const initCode = generate(init.node).code;
 
-  const hasBeenFound = hasValueInCode({code : initCode, valueToFind, mode});
+	const hasBeenFound = hasValueInCode({code : initCode, valueToFind, mode});
 
-  if(hasBeenFound){
-    return getPropertyValueInAssignment({path, siblingKey});
-  }
+	if(hasBeenFound){
+		return getPropertyValueInAssignment({path, siblingKey});
+	}
 
-  return null;
+	return null;
 
 }
 
 
-function getKeyIfFound({pathQuery, path, valueToFind, mode, siblingKey}){
+function getKeyIfFound({pathQuery, path, valueToFind, mode, siblingKey}){	
 
-  const code = generate(pathQuery.node).code;
+  const code = generate(pathQuery.node).code;  
   const hasBeenFound = hasValueInCode({code, valueToFind, mode});
 
   if(hasBeenFound){
@@ -460,16 +460,16 @@ function extractSignals({signalPaths}){
     signalPath.traverse({
       VariableDeclaration(path){
 
-        const findInVar = (({key, valueToFind, mode, siblingKey}) => {
-          const foundKeys = getKeyFromDeclaration({path, valueToFind, mode, siblingKey});
-          if(foundKeys !== null){
-            FINDERS[key] = foundKeys['value'];
-          }
-        });
+		const findInVar = (({key, valueToFind, mode, siblingKey}) => {			
+			const foundKeys = getKeyFromDeclaration({path, valueToFind, mode, siblingKey});
+			if(foundKeys !== null){
+				FINDERS[key] = foundKeys['value'];
+			}
+		});
 
         findInVar({key: 'webgl.all_bits', valueToFind : `"getContextAttributes"]()`, mode : `endsWith`, siblingKey : 5});
-        findInVar({key: 'user_agent', valueToFind : `["userAgent"]`, mode : `endsWith`, siblingKey : 1});
-        findInVar({key: 'navigator_language', valueToFind : `["language"]`, mode : `endsWith`, siblingKey : 1});
+        findInVar({key: 'user_agent', valueToFind : `["userAgent"]`, mode : `endsWith`, siblingKey : 5});
+        findInVar({key: 'navigator_language', valueToFind : `["language"]`, mode : `endsWith`, siblingKey : 5});		
         findInVar({key: 'date_get_time_zone_off_set', valueToFind : `new window["Date"]()["getTimezoneOffset"]() / -60`, mode : `endsWith`, siblingKey : 1});
         findInVar({key: 'open_database', valueToFind : `["openDatabase"] ? true : false`, mode : `endsWith`, siblingKey : 1});
         findInVar({key: 'cpu_class', valueToFind : `["cpuClass"]`, mode : `endsWith`, siblingKey : 2});
@@ -482,6 +482,9 @@ function extractSignals({signalPaths}){
         findInVar({key: 'navigator_product_sub', valueToFind : /(.*?)\["productSub"\]/, mode : `regex`, siblingKey : 1});
         findInVar({key: 'browser.is_internet_explorer', valueToFind : /"Netscape" \&\& (.*?)\["test"\]\((.*?)\["userAgent"\]\)/, mode : `regex`, siblingKey : 1});
         findInVar({key: 'browser.webdriver', valueToFind : /(.*?)\["webdriver"\] \? true : false/, mode : `regex`, siblingKey : 1});
+
+		findInVar({key: 'window_size.window_screen_width', valueToFind : `["screen"]["width"]`, mode : `endsWith`, siblingKey : 1});
+		findInVar({key: 'window_size.window_screen_height', valueToFind : `["screen"]["height"]`, mode : `endsWith`, siblingKey : 1});
 
         (() => {
 
@@ -1088,7 +1091,7 @@ function extractSignals({signalPaths}){
 					if (currentSibling.getSibling(currentSibling.key + 3).type === "ExpressionStatement") {
 
 						FINDERS['events'] = getPropertyValue(currentSibling.getSibling(currentSibling.key + 3).get(`expression.left.property`));
-						
+
 					}
                   
 					break;
@@ -1649,7 +1652,7 @@ function extractSignals({signalPaths}){
       AssignmentExpression(path){
 
         const findInAssignment = (({key, valueToFind, mode, siblingKey, instance = 0}) => {
-          let currentInstance = 0;
+          let currentInstance = 0;	  
 
           const foundKeys = getKeyIfFound({pathQuery : path.get(`right`), path, valueToFind, mode, siblingKey});
           if(foundKeys !== null){
@@ -1681,8 +1684,11 @@ function extractSignals({signalPaths}){
         !(FINDERS['events.touch.rotation_angle']) && findInAssignment({key : 'events.touch.rotation_angle', valueToFind : `["rotationAngle"]`, mode : `endsWith`, siblingKey : 0});
         !(FINDERS['events.touch.force']) && findInAssignment({key : 'events.touch.force', valueToFind : `["force"]`, mode : `endsWith`, siblingKey : 0});
         !(FINDERS['navigator_languages.languages_is_not_undefined']) && findInAssignment({key : 'navigator_languages.languages_is_not_undefined', valueToFind : `"languages") !== undefined`, mode : `endsWith`, siblingKey : 0});
-        !(FINDERS['window_size.window_screen_width']) && findInAssignment({key : 'window_size.window_screen_width', valueToFind : `window["screen"]["width"]`, mode : `endsWith`, siblingKey : 0});
-        !(FINDERS['window_size.window_screen_height']) && findInAssignment({key : 'window_size.window_screen_height', valueToFind : `window["screen"]["height"]`, mode : `endsWith`, siblingKey : 0});
+		/**
+		 * These 2 properties are not in Assignment, but in VariableDeclaration
+		 */
+        //!(FINDERS['window_size.window_screen_width']) && findInAssignment({key : 'window_size.window_screen_width', valueToFind : `window["screen"]["width"]`, mode : `endsWith`, siblingKey : 1});
+        //!(FINDERS['window_size.window_screen_height']) && findInAssignment({key : 'window_size.window_screen_height', valueToFind : `window["screen"]["height"]`, mode : `endsWith`, siblingKey : 1});
         !(FINDERS['window_size.window_screen_avail_height']) && findInAssignment({key : 'window_size.window_screen_avail_height', valueToFind : `window["screen"]["availHeight"]`, mode : `endsWith`, siblingKey : 0});
         !(FINDERS['window_size.window_screen_avail_left']) && findInAssignment({key : 'window_size.window_screen_avail_left', valueToFind : `window["screen"]["availLeft"]`, mode : `endsWith`, siblingKey : 0});
         !(FINDERS['window_size.window_screen_avail_top']) && findInAssignment({key : 'window_size.window_screen_avail_top', valueToFind : `window["screen"]["availTop"]`, mode : `endsWith`, siblingKey : 0});
@@ -1948,6 +1954,8 @@ function extractSignals({signalPaths}){
           }
 
         })();
+
+
         (() => {
           const block = path.get(`block.body`);
 
@@ -1978,7 +1986,7 @@ function extractSignals({signalPaths}){
             FINDERS['plugins_named_item_item_refresh.refresh'] = getPropertyValue(leftProp);
           }
 
-        })();
+        })();		
 
       },
       ForInStatement(path){
@@ -2018,6 +2026,42 @@ function extractSignals({signalPaths}){
         })();
 
       },
+
+	  /**
+	   * Anh's add for CallExpression
+	   */
+	  CallExpression(path) {
+		
+		function setTimeStampWithCode(path, codePattern, setPropertyName) {
+			const code = generate(path.node).code; 
+
+			if (code !== codePattern) {
+				return; 
+			}		
+
+			var parent = path.parentPath.parentPath.parentPath.parentPath.parentPath.parentPath.parentPath;
+
+			//There are 2 block has the same info: 1st is type = "BinaryExpression", and the 2nd is AssignmentExpression
+			if (parent.type != "AssignmentExpression") {
+				return; 
+			}
+
+			//console.log(generate(parent.node).code);
+
+			const leftProp = parent.get(`left.property`);
+
+			FINDERS[setPropertyName] = getPropertyValue(leftProp);
+		}
+		
+		
+
+		setTimeStampWithCode(path, `new window["Date"]()["getTime"]()["toString"]()`, 'timestamps.date_get_time');
+		setTimeStampWithCode(path, `new window["File"]([], "")["lastModified"]["toString"]()`, 'timestamps.file_last_modified');
+		setTimeStampWithCode(path, `window["performance"]["now"]()["toString"]()`, 'timestamps.performance_now');
+		setTimeStampWithCode(path, `new window["DocumentTimeline"]()["currentTime"]["toString"]()`, 'timestamps.document_timeline');
+		setTimeStampWithCode(path, `window["performance"]["timing"]["navigationStart"]["toString"]()`, 'timestamps.performance_timing');
+
+	  }
 
     })
   );
