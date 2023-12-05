@@ -423,8 +423,8 @@ const FINDERS = {
   'webgl_rendering_call.hash' : false,
   'window_object_get_own_property_names_a' : false,
   'window_object_get_own_property_names_b' : false,
-  'window_object_get_own_property_names_b.prev' : false,
-  'window_object_get_own_property_names_b.next' : false,
+  //'window_object_get_own_property_names_b.prev' : false,
+  //'window_object_get_own_property_names_b.next' : false,
   'window_object_get_own_property_names_last_30' : false,
   'visual_view_port' : false,
   'visual_view_port.visual_view_port_width' : false,
@@ -450,7 +450,7 @@ const FINDERS = {
   'tampering.no' : false,
   'vendor_name' : false,
   'vendor_value' : false,
-  'value_vendor_name' : false,
+  //'value_vendor_name' : false,
   'value_vendor_value' : false,
 };
 
@@ -713,6 +713,8 @@ function extractSignalKeys(ast){
 
       })();
 
+      /*
+
       (() => {
         const code = generate(path.node).code;
 
@@ -724,6 +726,8 @@ function extractSignalKeys(ast){
         nextPath = findFirstStringifyForward(nextPath.getNextSibling());
         FINDERS['value_vendor_name'] = nextPath.get("declarations.0.init.arguments.0").node.value;
       })();
+
+      */
 
       (() => {
         const code = generate(path.node).code;

@@ -406,8 +406,8 @@ class Reese84 {
       }),
       [this.signalKeys[`window_object_get_own_property_names_a`]] : encode(this.encoders[8][6].encoder, data.window_object_get_own_property_names_a),
       [this.signalKeys[`window_object_get_own_property_names_b`]] : encode(this.encoders[8][7].encoder, {
-        [this.signalKeys[`window_object_get_own_property_names_b.prev`]] : data.window_object_get_own_property_names_b.prev,
-        [this.signalKeys[`window_object_get_own_property_names_b.next`]] : data.window_object_get_own_property_names_b.next,
+        //[this.signalKeys[`window_object_get_own_property_names_b.prev`]] : data.window_object_get_own_property_names_b.prev,
+        //[this.signalKeys[`window_object_get_own_property_names_b.next`]] : data.window_object_get_own_property_names_b.next,
       }),
       [this.signalKeys[`window_object_get_own_property_names_last_30`]] : encode(this.encoders[8][8].encoder, data.window_object_get_own_property_names_last_30),
       [this.signalKeys[`visual_view_port`]] : encode(this.encoders[8][9].encoder, {
@@ -437,7 +437,7 @@ class Reese84 {
         [this.signalKeys[`tampering.prototype_of_navigator_device_memory`],getTamperingValue(data.tampering.prototype_of_navigator_device_memory)],
         [this.signalKeys[`tampering.prototype_of_navigator_permissions`], getTamperingValue(data.tampering.prototype_of_navigator_permissions)]
       ]),
-      [this.signalKeys[`vendor_name`]] : encode(this.encoders[9][2].encoder, this.signalKeys.value_vendor_name),
+      //[this.signalKeys[`vendor_name`]] : encode(this.encoders[9][2].encoder, this.signalKeys.value_vendor_name),
       [this.signalKeys[`vendor_value`]] : encode(this.encoders[9][3].encoder, this.signalKeys.value_vendor_value),
     });
 
@@ -832,8 +832,8 @@ class Reese84 {
       decodedPayload[`window_object_get_own_property_names_b`] = {};
       const rawPayload = decode(this.encoders[8][7].decoder, rawDecodedPayload[this.signalKeys[`window_object_get_own_property_names_b`]]);
 
-      decodedPayload[`window_object_get_own_property_names_b`][`prev`] = rawPayload[this.signalKeys[`window_object_get_own_property_names_b.prev`]];
-      decodedPayload[`window_object_get_own_property_names_b`][`next`] = rawPayload[this.signalKeys[`window_object_get_own_property_names_b.next`]];
+      //decodedPayload[`window_object_get_own_property_names_b`][`prev`] = rawPayload[this.signalKeys[`window_object_get_own_property_names_b.prev`]];
+      //decodedPayload[`window_object_get_own_property_names_b`][`next`] = rawPayload[this.signalKeys[`window_object_get_own_property_names_b.next`]];
     }
 
     decodedPayload['window_object_get_own_property_names_last_30'] = decode(this.encoders[8][8].decoder, rawDecodedPayload[this.signalKeys[`window_object_get_own_property_names_last_30`]])

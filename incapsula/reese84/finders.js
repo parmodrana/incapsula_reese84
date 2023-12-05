@@ -2108,11 +2108,13 @@ const FINDERS = {
 
         if(!code.endsWith(`window["Object"]["getOwnPropertyNames"](window);`)){
           return;
-        }
+        }  
 
         if(codeNext.endsWith(`\\\\udbff]$");`)){
           return;
         }
+
+        
 
         found = true;
         const leftProp = findFirstBtoaForward(varPath).getNextSibling().get(`expression.left.property`);
@@ -2151,6 +2153,7 @@ const FINDERS = {
 
     return { found, value };
   },
+  /*
   "window_object_get_own_property_names_b.prev" : function(path) {
 
     let found = false;
@@ -2195,6 +2198,7 @@ const FINDERS = {
 
     return { found, value };
   },
+  */
   "window_object_get_own_property_names_last_30" : function(path) {
     let found = false;
     let value = undefined;
@@ -2718,6 +2722,7 @@ const FINDERS = {
 
     return { found, value };
   },
+  /*
   "value_vendor_name" : function(path) {
     let found = false;
     let value = undefined;
@@ -2740,6 +2745,7 @@ const FINDERS = {
 
     return { found, value };
   },
+  */
   "value_vendor_value" : function(path) {
     let found = false;
     let value = undefined;

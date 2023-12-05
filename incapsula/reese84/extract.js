@@ -990,8 +990,8 @@ function extractSignalsKeys(ast) {
     'webgl_rendering_call.hash' : getValue(`webgl_rendering_call.hash`),
     'window_object_get_own_property_names_a' : getValue(`window_object_get_own_property_names_a`),
     'window_object_get_own_property_names_b' : getValue(`window_object_get_own_property_names_b`),
-    'window_object_get_own_property_names_b.prev' : getValue(`window_object_get_own_property_names_b.prev`),
-    'window_object_get_own_property_names_b.next' : getValue(`window_object_get_own_property_names_b.next`),
+    //'window_object_get_own_property_names_b.prev' : getValue(`window_object_get_own_property_names_b.prev`),
+    //'window_object_get_own_property_names_b.next' : getValue(`window_object_get_own_property_names_b.next`),
     'window_object_get_own_property_names_last_30' : getValue(`window_object_get_own_property_names_last_30`),
     'visual_view_port' : getValue(`visual_view_port`),
     'visual_view_port.visual_view_port_width' : getValue(`visual_view_port.visual_view_port_width`),
@@ -1017,7 +1017,7 @@ function extractSignalsKeys(ast) {
     'tampering.no' : getValue(`tampering.no`),
     'vendor_name' : getValue(`vendor_name`),
     'vendor_value' : getValue(`vendor_value`),
-    'value_vendor_name' : getValue(`value_vendor_name`),
+    //'value_vendor_name' : getValue(`value_vendor_name`),
     'value_vendor_value' : getValue(`value_vendor_value`),
   };
 }
@@ -1285,8 +1285,8 @@ function extractSignalsKeys2(ast) {
     'webgl_rendering_call.hash' : getValue(`webgl_rendering_call.hash`),
     'window_object_get_own_property_names_a' : getValue(`window_object_get_own_property_names_a`),
     'window_object_get_own_property_names_b' : getValue(`window_object_get_own_property_names_b`),
-    'window_object_get_own_property_names_b.prev' : getValue(`window_object_get_own_property_names_b.prev`),
-    'window_object_get_own_property_names_b.next' : getValue(`window_object_get_own_property_names_b.next`),
+    //'window_object_get_own_property_names_b.prev' : getValue(`window_object_get_own_property_names_b.prev`),
+    //'window_object_get_own_property_names_b.next' : getValue(`window_object_get_own_property_names_b.next`),
     'window_object_get_own_property_names_last_30' : getValue(`window_object_get_own_property_names_last_30`),
     'visual_view_port' : getValue(`visual_view_port`),
     'visual_view_port.visual_view_port_width' : getValue(`visual_view_port.visual_view_port_width`),
@@ -1312,7 +1312,7 @@ function extractSignalsKeys2(ast) {
     'tampering.no' : getValue(`tampering.no`),
     'vendor_name' : getValue(`vendor_name`),
     'vendor_value' : getValue(`vendor_value`),
-    'value_vendor_name' : getValue(`value_vendor_name`),
+    //'value_vendor_name' : getValue(`value_vendor_name`),
     'value_vendor_value' : getValue(`value_vendor_value`),
   };
 }

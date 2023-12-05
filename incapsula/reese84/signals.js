@@ -426,8 +426,8 @@ function extractSignals({signalPaths}){
     'webgl_rendering_call.hash' : false,
     'window_object_get_own_property_names_a' : false,
     'window_object_get_own_property_names_b' : false,
-    'window_object_get_own_property_names_b.prev' : false,
-    'window_object_get_own_property_names_b.next' : false,
+    //'window_object_get_own_property_names_b.prev' : false,
+    //'window_object_get_own_property_names_b.next' : false,
     'window_object_get_own_property_names_last_30' : false,
     'visual_view_port' : false,
     'visual_view_port.visual_view_port_width' : false,
@@ -453,7 +453,7 @@ function extractSignals({signalPaths}){
     'tampering.no' : false,
     'vendor_name' : false,
     'vendor_value' : false,
-    'value_vendor_name' : false,
+    //'value_vendor_name' : false,
     'value_vendor_value' : false,
   };
   signalPaths.forEach((signalPath) =>
@@ -720,6 +720,8 @@ function extractSignals({signalPaths}){
 
         })();
 
+		/*
+
         (() => {
           const code = generate(path.node).code;
 
@@ -731,6 +733,8 @@ function extractSignals({signalPaths}){
           nextPath = findFirstStringifyForward(nextPath.getNextSibling());
           FINDERS['value_vendor_name'] = nextPath.get("declarations.0.init.arguments.0").node.value;
         })();
+
+		*/
 
         (() => {
           const code = generate(path.node).code;
@@ -914,20 +918,20 @@ function extractSignals({signalPaths}){
         })();
 
         (() => {
-          const code = generate(path.node).code;
-          //const codeNext = generate(path.getNextSibling().node).code;
-		  const codeNext = generate(path.getSibling(path.key + 4).node).code;
+			const code = generate(path.node).code;
+			//const codeNext = generate(path.getNextSibling().node).code;
+			const codeNext = generate(path.getSibling(path.key + 4).node).code;
 
-          if(!code.endsWith(`window["Object"]["getOwnPropertyNames"](window);`)){
-            return;
-          }
+			if(!code.endsWith(`window["Object"]["getOwnPropertyNames"](window);`)){
+				return;
+			}
 
-          if(codeNext.endsWith(`\\\\udbff]$");`)){
-            return;
-          }
+			if(!codeNext.endsWith(`\\\\udbff]$");`)){
+				return;
+			}			
 
-          const leftProp = findFirstBtoaForward(path).getNextSibling().get(`expression.left.property`);
-          FINDERS['window_object_get_own_property_names_a'] = getPropertyValue(leftProp);
+			const leftProp = findFirstBtoaBackwards(path).getNextSibling().get(`expression.left.property`);
+			FINDERS['window_object_get_own_property_names_a'] = getPropertyValue(leftProp);
 
         })();
 
@@ -940,14 +944,12 @@ function extractSignals({signalPaths}){
             return;
           }
 
-
-
-          if(codeNext.endsWith(`\\\\udbff]$");`)){
+          if(!codeNext.endsWith(`\\\\udbff]$");`)){
             return;
           }
 
-          const nextPath = findFirstBtoaForward(path);
-          const leftProp = findFirstBtoaForward(nextPath.getNextSibling()).getNextSibling().get(`expression.left.property`);
+          //const nextPath = findFirstBtoaForward(path);
+          const leftProp = findFirstBtoaBackwards(path).getNextSibling().getNextSibling().get(`expression.left.property`);
           FINDERS['window_object_get_own_property_names_b'] = getPropertyValue(leftProp);
         })();
 
@@ -1039,7 +1041,8 @@ function extractSignals({signalPaths}){
 
         (() => {
           const code = generate(path.node).code;
-          const codeNext = generate(path.getNextSibling().node).code;
+          const codeNext = generate(path.getNextSibling().node).code;		  
+		  //const codeNext = generate(path.getSibling(path.key + 4).node).code;
 
           if(!code.endsWith(`window["Object"]["getOwnPropertyNames"](window);`)){
             return;
@@ -1055,7 +1058,8 @@ function extractSignals({signalPaths}){
 
         (() => {
           const code = generate(path.node).code;
-          const codeNext = generate(path.getNextSibling().node).code;
+          //const codeNext = generate(path.getNextSibling().node).code;
+		  const codeNext = generate(path.getSibling(path.key + 4).node).code;
 
           if(!code.endsWith(`window["Object"]["getOwnPropertyNames"](window);`)){
             return;
@@ -1068,6 +1072,31 @@ function extractSignals({signalPaths}){
           const leftProp = findFirstBtoaForward(path).getNextSibling().get(`expression.left.property`);
           FINDERS['window_object_get_own_property_names_last_30'] = getPropertyValue(leftProp);
         })();
+
+
+
+		(() => {
+			const code = generate(path.node).code;
+  
+			if(!code.endsWith(`window["screen"]["width"];`)){
+			  return;
+			}
+
+
+			if (path.getNextSibling().type === "ExpressionStatement") {
+				return;
+			}  
+			
+  
+			let nextPath = findFirstBtoaBackwards(path);		  
+  
+			nextPath = findFirstBtoaBackwards(nextPath.getPrevSibling()); 
+  
+			
+			const leftProp = nextPath.getNextSibling().get(`expression.left.property`);
+			FINDERS['timestamps'] = getPropertyValue(leftProp);
+  
+		  })();
 
       },
       MemberExpression(path){
@@ -1492,8 +1521,13 @@ function extractSignals({signalPaths}){
             return;
           }
 
-          let nextPath = findFirstBtoaBackwards(path);
-          nextPath = findFirstBtoaBackwards(nextPath.getPrevSibling())
+		  console.log(code );
+
+          let nextPath = findFirstBtoaBackwards(path);		  
+
+          nextPath = findFirstBtoaBackwards(nextPath.getPrevSibling()); 
+
+		  
           const leftProp = nextPath.getNextSibling().get(`expression.left.property`);
           FINDERS['timestamps'] = getPropertyValue(leftProp);
 
@@ -1877,6 +1911,8 @@ function extractSignals({signalPaths}){
           FINDERS['navigator_build_id'] = getPropertyValue(leftProp);
         })();
 
+		/*
+
         (() => {
           const code = generate(path.node.test).code;
 
@@ -1899,6 +1935,8 @@ function extractSignals({signalPaths}){
           const leftProp = path.get("consequent.body.1.consequent.body.0.expression.left.property")
           FINDERS['window_object_get_own_property_names_b.next'] = getPropertyValue(leftProp);
         })();
+
+		*/
 
         (() => {
           const code = generate(path.node.test).code;
@@ -2060,6 +2098,104 @@ function extractSignals({signalPaths}){
 		setTimeStampWithCode(path, `window["performance"]["now"]()["toString"]()`, 'timestamps.performance_now');
 		setTimeStampWithCode(path, `new window["DocumentTimeline"]()["currentTime"]["toString"]()`, 'timestamps.document_timeline');
 		setTimeStampWithCode(path, `window["performance"]["timing"]["navigationStart"]["toString"]()`, 'timestamps.performance_timing');
+
+	  }, 
+
+	  ReturnStatement(path) {
+
+		(() => {
+			const code = generate(path.node).code; 
+
+			if (!code.endsWith(`window["document"]["documentElement"]["children"];`)) {
+				return;
+			}
+
+			var nearestParentTry = path;
+			while(nearestParentTry.node !== undefined){			
+
+				if(nearestParentTry.type === `TryStatement`){
+					break;
+				}
+				nearestParentTry = nearestParentTry.parentPath;
+			}
+
+			var statement = nearestParentTry.getNextSibling(); 
+			const leftProp = statement.get(`expression.left.property`);
+			FINDERS['document_children.document_script_element_children'] = getPropertyValue(leftProp);
+
+		})();
+
+
+		(() => {
+			const code = generate(path.node).code; 
+
+			if (!code.endsWith(`window["document"]["head"]["children"];`)) {
+				return;
+			}
+
+			var nearestParentTry = path;
+			while(nearestParentTry.node !== undefined){			
+
+				if(nearestParentTry.type === `TryStatement`){
+					break;
+				}
+				nearestParentTry = nearestParentTry.parentPath;
+			}
+
+			var statement = nearestParentTry.getNextSibling(); 
+			const leftProp = statement.get(`expression.left.property`);
+			FINDERS['document_children.document_head_element_children'] = getPropertyValue(leftProp);
+
+		})();
+
+
+		(() => {
+			const code = generate(path.node).code; 
+
+			if (!code.endsWith(`window["document"]["body"]["children"];`)) {
+				return;
+			}
+
+			var nearestParentTry = path;
+			while(nearestParentTry.node !== undefined){			
+
+				if(nearestParentTry.type === `TryStatement`){
+					break;
+				}
+				nearestParentTry = nearestParentTry.parentPath;
+			}
+
+			var statement = nearestParentTry.getNextSibling(); 
+			const leftProp = statement.get(`expression.left.property`);
+			FINDERS['document_children.document_body_element_children'] = getPropertyValue(leftProp);
+
+		})();
+
+
+		(() => {
+			const code = generate(path.node).code; 
+
+			if (!code.endsWith(`window["document"]["body"]["children"];`)) {
+				return;
+			}
+
+			var nearestParentTry = path;
+			while(nearestParentTry.node !== undefined){			
+
+				if(nearestParentTry.type === `TryStatement`){
+					break;
+				}
+				nearestParentTry = nearestParentTry.parentPath;
+			}
+
+			var statement = nearestParentTry.getSibling(nearestParentTry.key + 3); 			
+
+			const leftProp = statement.get(`expression.left.property`);
+			FINDERS['document_children'] = getPropertyValue(leftProp);
+
+		})();
+
+
 
 	  }
 
