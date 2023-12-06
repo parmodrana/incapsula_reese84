@@ -5719,7 +5719,7 @@
 
               tB["cUCx+aCN5+Y="] = ny;
               var vt = tB;
-              xm["eKJFQwaxzBYyWbW3DPc="] = vt;
+              xm["eKJFQwaxzBYyWbW3DPc="] = vt;//Should be children
               var k_ = xorShift128(187585459, T9);
               var si = [];
               var Bx = 0;
@@ -6109,6 +6109,10 @@
                   o4.push(LZ);
                 }
               }
+
+              console.log("LOG");
+
+              console.log(xm, o4, Qe);
 
               var lC = window.btoa(o4.join(""));
               xm["Zgj/GkPSq+315gh52cej0o5vrilLzP329t07Zn9NAXLs0Pwb/jC/02C6AOc="] = lC;

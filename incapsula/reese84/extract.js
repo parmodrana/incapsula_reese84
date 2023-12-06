@@ -6,6 +6,8 @@ const traverse = require(`@babel/traverse`).default;
 const atob = require(`atob`);
 const btoa = require(`btoa`);
 
+const fs = require('fs');
+
 const { extractSignals } = require(`./signals.js`);
 const FINDERS = require('./finders.js');
 
@@ -312,7 +314,7 @@ function createEncoderFromPath({
 
   };
 
-
+/*
   const handleWhileAndWithShiftLeftOrRight = (path) => {
     return {
       "encoder" : function (data, xor) {
@@ -324,13 +326,16 @@ function createEncoderFromPath({
       type
     };
   }
+  */
 
   switch (type) {
     case `whileAndByOneByte`:
       return handleWhileAndByOneByte(path);
 
-      case `whileAndWithShiftLeftOrRight`:
+	/*
+	case `whileAndWithShiftLeftOrRight`:
         return handleWhileAndWithShiftLeftOrRight(path);
+	*/
 
     case `whileCharCodeAt`:
       return handleWhileCharCodeAt(path);
@@ -371,6 +376,10 @@ function createEncoderFromPath({
 
 function extractEncoderType(path) {
 
+
+
+	console.log(`extractEncoderType`, generate(path.node).code, path.type);
+
   const body = path.get(`body.body`);
   const firstNode = body[0].node;
   const secondNode = body.length >= 2 ? body[1].node : null;
@@ -395,11 +404,13 @@ function extractEncoderType(path) {
          *    We need to make it work with type 2 only
          */
 
+		console.log(`firstNodeCode `, firstNodeCode);
+
         if (firstNodeCode.endsWith(`& 255);`)) {
           if (firstNodeCode.indexOf(`>>`) < 0)
             return `whileAndByOneByte`;
           else 
-            return `whileAndWithShiftLeftOrRight`;
+            return false;//`whileAndWithShiftLeftOrRight`;
         }
 
         if (firstNodeCode.includes(`charCodeAt`)) {
@@ -486,7 +497,7 @@ function extractEncoderType(path) {
 
     return false;
 
-  } else {
+  } else {     //ForInStatement
     const lastNode = body.slice(-1)[0].node;
 
     if (!(lastNode.type === `IfStatement` && generate(lastNode.test).code.includes(`hasOwnProperty`))) {
@@ -528,7 +539,7 @@ function extractEncoderType(path) {
 
 function getXorEncoderFromPath(path) {
 
-  const encoderVar = path.get(`declarations.0.id.name`).node;
+  const encoderVar = path.get(`declarations.0.id.name`).node;  
 
   const isStartOfEncoder = (n) => {
     return n.type === `VariableDeclaration` && n.declarations.length === 1 && n.declarations[0].init.type === `CallExpression` &&
@@ -540,7 +551,7 @@ function getXorEncoderFromPath(path) {
       generate(n.declarations[0].init).code.includes(`btoa`);
   };
 
-  let currentPath = path.getNextSibling();
+  let currentPath = path.getNextSibling();  
 
   const encoders = [];
   const paths = [];
@@ -549,29 +560,34 @@ function getXorEncoderFromPath(path) {
   while (currentPath.node !== undefined || currentPath.node !== null) {
 
     if (isStartOfEncoder(currentPath.node)) {
-      //SKIP THE NEXT TIME
-      currentPath.setData(`skip`, true);
+		//console.log(`next code isStartOfEncoder`,generate(currentPath.node).code);
+		//SKIP THE NEXT TIME
+		currentPath.setData(`skip`, true);
 
-      const subEncoders = getXorEncoderFromPath(currentPath);
+		const subEncoders = getXorEncoderFromPath(currentPath);
 
-      subEncoders.forEach((subEncoder) => encoders.push(subEncoder));
-      const lastSubEncoder = subEncoders.slice(-1)[0][`nextPath`];
+		subEncoders.forEach((subEncoder) => encoders.push(subEncoder));
+		const lastSubEncoder = subEncoders.slice(-1)[0][`nextPath`];
 
-      currentPath = lastSubEncoder.getNextSibling();
-      continue;
+		currentPath = lastSubEncoder.getNextSibling();
+		continue;
     }
 
+	//console.log(`next code`,generate(currentPath.node).code);
+
     if (isEndOfEncoder(currentPath.node)) {
-      break;
+      	break;
     }
 
     if (LOOP_TYPES.includes(currentPath.type)) {
-      const encoderType = extractEncoderType(currentPath);
+		const encoderType = extractEncoderType(currentPath);
 
-      if (encoderType) {
-        const encoderPath = createEncoderFromPath({ path : currentPath, type : encoderType});
-        loopEncoders.push(encoderPath);
-      }
+		console.log(encoderType);
+
+		if (encoderType) {
+			const encoderPath = createEncoderFromPath({ path : currentPath, type : encoderType});
+			loopEncoders.push(encoderPath);
+		}
     }
 
     currentPath = currentPath.getNextSibling();
@@ -644,6 +660,9 @@ function getSignalsPaths(ast) {
 
   const paths = [];
 
+  const date = new Date();
+  const timestamp = date.getTime();
+
   traverse(ast, {
 
     Program(path) {
@@ -653,12 +672,13 @@ function getSignalsPaths(ast) {
       
       for(let bodyPath of bodyPaths){
         if(t.isExpressionStatement(bodyPath.node) && t.isCallExpression(bodyPath.node.expression) && generate(bodyPath.node.expression.callee).code.endsWith(`["push"]`)){
-            
+
+            fs.appendFileSync(`signal_${timestamp}.js`,generate(bodyPath.node).code + "\r\n");
+			
+
             paths.push(bodyPath);
         }
-      }
-
-      console.log(`added successfully`);
+      }      
      
     }
   });
@@ -670,13 +690,15 @@ function extractXorEncoders(ast){
 	const xorEncoders = [];
 	const signalsPaths = getSignalsPaths(ast);
 
-	signalsPaths.forEach((currentPath, index) => {
+	signalsPaths.forEach((currentPath, index) => {		
 
 		xorEncoders[index] = [];
 
-		const currentEncoders = xorEncoders[index];
+		const currentEncoders = xorEncoders[index];  
+		
+		console.log(index);
 
-		if(index === 2){
+		if(index === 2){ /**It's no longer have 'try{}' in 'push' which  index == 2*/
 			currentPath.traverse({
 				TryStatement(tryPath){
 
@@ -690,20 +712,22 @@ function extractXorEncoders(ast){
 				tryPath.get(`block.body.0.consequent.body.0.expression.right.callee.body`).traverse({
 					CallExpression(callPath) {
 
-					const callee = callPath.get(`callee`);
+						const callee = callPath.get(`callee`);
 
-					if (!(callee.type === `Identifier` && callee.node.name === XOR_SHIFT_128)) {
-						return;
-					}
-					const statementPath = callPath.getStatementParent();
+						if (!(callee.type === `Identifier` && callee.node.name === XOR_SHIFT_128)) {
+							return;
+						}
+						const statementPath = callPath.getStatementParent();
 
-					if (!statementPath.getData(`skip`, false)) {
+						console.log(index, generate(statementPath.node).code);
 
-						const encoders = getXorEncoderFromPath(statementPath);
-						encoders.forEach((encoder) =>
-						currentEncoders.push(buildEncoderAndDecoder(encoder[`encoders`], encoder['var']))
-						);
-					}
+						if (!statementPath.getData(`skip`, false)) {
+
+							const encoders = getXorEncoderFromPath(statementPath);
+							encoders.forEach((encoder) =>
+							currentEncoders.push(buildEncoderAndDecoder(encoder[`encoders`], encoder['var']))
+							);
+						}
 
 					}
 				});
@@ -711,6 +735,8 @@ function extractXorEncoders(ast){
 				const timestampProp = tryPath.get(`block.body.0.consequent.body.0.expression.left.property`).node;
 				ast.restorePaths.push([tryPath, t.cloneNode(tryPath.node)]);
 
+
+				//Try to set `FINDME` by changing `TIMESTAMPS`
 				tryPath.replaceWith(
 					t.expressionStatement(
 					t.assignmentExpression(
@@ -724,25 +750,28 @@ function extractXorEncoders(ast){
 			});
 		}
 
-	currentPath.traverse({
-		CallExpression(callPath) {
+		currentPath.traverse({
+			CallExpression(callPath) {
 
-			const callee = callPath.get(`callee`);
+				const callee = callPath.get(`callee`);
 
-			if (!(callee.type === `Identifier` && callee.node.name === XOR_SHIFT_128)) {
-				return;
+				if (!(callee.type === `Identifier` && callee.node.name === XOR_SHIFT_128)) {
+					return;
+				}
+				const statementPath = callPath.getStatementParent();
+
+				console.log(generate(statementPath.node).code, statementPath.getData(`skip`, false));
+
+				if (!statementPath.getData(`skip`, false)) {
+
+					const encoders = getXorEncoderFromPath(statementPath);
+
+					encoders.forEach((encoder) => {
+						currentEncoders.push(buildEncoderAndDecoder(encoder[`encoders`], encoder['var']));
+					});
+				}
 			}
-			const statementPath = callPath.getStatementParent();
-			if (!statementPath.getData(`skip`, false)) {
-
-				const encoders = getXorEncoderFromPath(statementPath);
-
-				encoders.forEach((encoder) => {
-					currentEncoders.push(buildEncoderAndDecoder(encoder[`encoders`], encoder['var']));
-				});
-			}
-		}
-	});
+		});
 
   });  
   return xorEncoders;
@@ -773,7 +802,7 @@ function extractSignalsKeys(ast) {
 
   const signalKeys = extractSignals({ signalPaths : paths});
 
-  console.log(JSON.stringify(signalKeys));
+  //console.log(JSON.stringify(signalKeys));
   
   const getValue = (key) => {
 

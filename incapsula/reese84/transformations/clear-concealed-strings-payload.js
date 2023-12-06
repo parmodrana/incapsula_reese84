@@ -16,13 +16,9 @@ function createSandbox(ast){
 
 function clearConcealedStringsPayload(ast){
 
-  const sandbox = createSandbox(ast);
+  const sandbox = createSandbox(ast); 
 
-  //console.log(ast.program.body);
-
-  const concealerName = ast.program.body[4].declarations[0].id.name;
-
-  console.log(`concealerName: ${concealerName}`);  
+  const concealerName = ast.program.body[4].declarations[0].id.name;  
 
   traverse(ast, {
 

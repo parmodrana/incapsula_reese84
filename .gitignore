@@ -3,3 +3,5 @@ throwaway/
 dist/
 package-lock.json
 ast*.js
+
+signal*.js
